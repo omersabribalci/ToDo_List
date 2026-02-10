@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   let editingTask = null;
+  let allCompletedOnce = false;
   const taskInput = document.getElementById("task-input");
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
@@ -24,8 +25,18 @@ document.addEventListener("DOMContentLoaded", () => {
       : "0%";
     progressNumbers.textContent = `${completedTasks} / ${totalTasks}`;
 
-    if (checkCompletion && totalTasks > 0 && completedTasks === totalTasks) {
+    if (
+      checkCompletion &&
+      totalTasks > 0 &&
+      completedTasks === totalTasks &&
+      !allCompletedOnce
+    ) {
       launchConfetti();
+      allCompletedOnce = true;
+    }
+
+    if (completedTasks !== totalTasks) {
+      allCompletedOnce = false;
     }
   };
 
@@ -144,12 +155,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && editingTask) {
-      // 🔁 görevi geri ekle
       addTask(editingTask.text, editingTask.completed, false);
       editingTask = null;
       taskInput.value = "";
 
-      // 🔓 kilitleri aç
       document.querySelectorAll("#task-list li").forEach((item) => {
         item.querySelectorAll("input, button").forEach((el) => {
           el.disabled = false;
