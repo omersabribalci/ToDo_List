@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  let editingTask = null;
   const taskInput = document.getElementById("task-input");
   const addTaskBtn = document.getElementById("add-task-btn");
   const taskList = document.getElementById("task-list");
@@ -47,24 +48,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const addTask = (text, completed = false, checkCompletion = true) => {
     const taskText = text || taskInput.value.trim();
-    if (!taskText) {
-      return;
-    }
+    if (!taskText) return;
 
     const li = document.createElement("li");
     li.innerHTML = `
-    <input type="checkbox" class="checkbox" ${completed ? "checked" : ""} />
-    <span>${taskText}</span>
-    <div class="task-buttons">
-        <button class="edit-btn">
-        <i class="fa-solid fa-pen"></i></button>
-        <button class="delete-btn">
-        <i class="fa-solid fa-trash"></i></button>
-    </div>
+      <input type="checkbox" class="checkbox" ${completed ? "checked" : ""} />
+      <span>${taskText}</span>
+      <div class="task-buttons">
+        <button class="edit-btn"><i class="fa-solid fa-pen"></i></button>
+        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
+      </div>
     `;
 
     const checkbox = li.querySelector(".checkbox");
     const editBtn = li.querySelector(".edit-btn");
+    const deleteBtn = li.querySelector(".delete-btn");
 
     if (completed) {
       li.classList.add("completed");
@@ -85,6 +83,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     editBtn.addEventListener("click", () => {
       if (!checkbox.checked) {
+        editingTask = {
+          text: li.querySelector("span").textContent,
+          completed: checkbox.checked,
+        };
+
+        document.querySelectorAll("#task-list li").forEach((item) => {
+          if (item !== li) {
+            item.querySelectorAll("input, button").forEach((el) => {
+              el.disabled = true;
+              el.style.opacity = "0.5";
+              el.style.pointerEvents = "none";
+            });
+          }
+        });
+
         taskInput.value = li.querySelector("span").textContent;
         li.remove();
         toggleEmptyState();
@@ -93,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    li.querySelector(".delete-btn").addEventListener("click", () => {
+    deleteBtn.addEventListener("click", () => {
       li.remove();
       toggleEmptyState();
       updateProgress();
@@ -105,12 +118,21 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleEmptyState();
     updateProgress(checkCompletion);
     saveTaskToLocalStorage();
+
+    document.querySelectorAll("#task-list li").forEach((item) => {
+      item.querySelectorAll("input, button").forEach((el) => {
+        el.disabled = false;
+        el.style.opacity = "1";
+        el.style.pointerEvents = "auto";
+      });
+    });
   };
 
   addTaskBtn.addEventListener("click", (e) => {
     e.preventDefault();
     addTask();
   });
+
   taskInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -119,28 +141,34 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   loadTasksFromLocalStorage();
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && editingTask) {
+      // 🔁 görevi geri ekle
+      addTask(editingTask.text, editingTask.completed, false);
+      editingTask = null;
+      taskInput.value = "";
+
+      // 🔓 kilitleri aç
+      document.querySelectorAll("#task-list li").forEach((item) => {
+        item.querySelectorAll("input, button").forEach((el) => {
+          el.disabled = false;
+          el.style.opacity = "1";
+          el.style.pointerEvents = "auto";
+        });
+      });
+    }
+  });
 });
 
 function launchConfetti() {
-  const duration = 2 * 1000; // 2 saniye
+  const duration = 2 * 1000;
   const end = Date.now() + duration;
 
   (function frame() {
-    confetti({
-      particleCount: 5,
-      angle: 60,
-      spread: 55,
-      origin: { x: 0 },
-    });
-    confetti({
-      particleCount: 5,
-      angle: 120,
-      spread: 55,
-      origin: { x: 1 },
-    });
+    confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+    confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
 
-    if (Date.now() < end) {
-      requestAnimationFrame(frame);
-    }
+    if (Date.now() < end) requestAnimationFrame(frame);
   })();
 }
