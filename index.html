@@ -11,13 +11,23 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <link rel="stylesheet" href="css/reset.css" />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
     <div class="container">
       <div class="todo-app">
-        <h1>To-Do App</h1>
+        <h1>To-Do List</h1>
+        <div class="stat-container">
+          <div class="details">
+            <h3>Keep it Up!</h3>
+            <div id="progressbar">
+              <div id="progress"></div>
+            </div>
+          </div>
+          <div class="stats-number">
+            <p id="numbers">0 / 0</p>
+          </div>
+        </div>
         <form class="input-area">
           <input
             type="text"
@@ -30,18 +40,18 @@
           </button>
         </form>
         <div class="todos-container">
-          <ul id="task-list">
-            <img
-              class="empty-image"
-              src="../assets/images/empty.svg"
-              alt="empty"
-              width="200"
-              height="200"
-            />
-          </ul>
+          <ul id="task-list"></ul>
+          <img
+            class="empty-image"
+            src="../assets/images/empty.svg"
+            alt="empty"
+            width="200"
+            height="200"
+          />
         </div>
       </div>
     </div>
     <script src="js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   </body>
 </html>
